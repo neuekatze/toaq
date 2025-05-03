@@ -204,13 +204,31 @@
 
       const allEntries = countWords(data, () => true, false, startDate, endDate, dateFilterEnabled);
       const scores = sumScores(data, true, startDate, endDate, dateFilterEnabled);
-      const consistency = {};
+
+      // Compute global average score per word
+      let globalScore = 0;
+      let globalWords = 0;
+
       for (const user in scores) {
-      const wordCount = filteredWords[user] || 0;
-      if (wordCount > 0) {
-        consistency[user] = (scores[user] / wordCount).toFixed(2);
+        if (filteredWords[user]) {
+          globalScore += scores[user];
+          globalWords += filteredWords[user];
+        }
       }
-      }
+
+      const m = globalWords > 0 ? globalScore / globalWords : 0;
+      const C = 50; // 50 for now
+      const consistency = {};
+for (const user in scores) {
+  const s = scores[user];
+  const w = filteredWords[user] || 0;
+
+  if (w > 0) {
+    const bayesianAvg = (C * m + s) / (C + w);
+    consistency[user] = bayesianAvg.toFixed(2);
+  }
+}
+
 
       renderTable('filtered', filteredWords);
       renderTable('scores', scores);
