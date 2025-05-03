@@ -37,6 +37,7 @@
     <button class="tab-btn active" data-tab="filtered">Most Words Added</button>
     <button class="tab-btn" data-tab="scores">Top Scores</button>
     <button class="tab-btn" data-tab="all">Most Entries Added (Unfiltered)</button>
+    <button class="tab-btn" data-tab="consistency">Consistency</button>
   </div>
 
   <div id="loading">Loading...</div>
@@ -53,6 +54,11 @@
     <h2>Most Entries Added (Unfiltered) <button style="float: right; background-color: #F8BBD0;" onclick="downloadCSV('all')">Download CSV</button></h2>
     <table><thead><tr><th>#</th><th>User</th><th>Entries</th></tr></thead><tbody></tbody></table>
   </div>
+  <div id="consistency" class="tab-content">
+    <h2>Consistency (Score per Word) <button style="float: right; background-color: #F8BBD0;" onclick="downloadCSV('consistency')">Download CSV</button></h2>
+    <table><thead><tr><th>#</th><th>User</th><th>Consistency</th></tr></thead><tbody></tbody></table>
+  </div>
+  
 
   <script>
     const IGNORE_USERS = new Set([ //these do nothing but clogging the scoreboard
@@ -145,7 +151,12 @@
     }
 
     function downloadCSV(containerId) {
-      const rows = [["#", "User", containerId === "scores" ? "Total Score" : "Count"]];
+      const rows = [["#", "User", 
+      containerId === "scores" ? "Total Score" :
+      containerId === "consistency" ? "Consistency" :
+      "Count"
+      ]];
+
       const tableRows = document.querySelectorAll(`#${containerId} tbody tr`);
       tableRows.forEach(row => {
         const cells = Array.from(row.querySelectorAll("td")).map(td => td.textContent);
@@ -193,10 +204,19 @@
 
       const allEntries = countWords(data, () => true, false, startDate, endDate, dateFilterEnabled);
       const scores = sumScores(data, true, startDate, endDate, dateFilterEnabled);
+      const consistency = {};
+      for (const user in scores) {
+      const wordCount = filteredWords[user] || 0;
+      if (wordCount > 0) {
+        consistency[user] = (scores[user] / wordCount).toFixed(2);
+      }
+      }
 
       renderTable('filtered', filteredWords);
       renderTable('scores', scores);
       renderTable('all', allEntries);
+      renderTable('consistency', consistency);
+
 
       document.getElementById('loading').style.display = 'none';
     }
@@ -206,4 +226,3 @@
   </script>
 </body>
 </html>
-
