@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Toaq Syllable Table</title>
+    <!-- have a lot of prpblems with site.css so im gonna just put it here -->
+  <style> 
+    @font-face {
+    font-family: Prova;
+    src: url(prova.woff);
+  }
+  
+  @font-face {
+    font-family: Prova;
+    src: url(provabold.woff);
+    font-weight: bold;
+  }
+  
+    body {
+    font-family: Prova, sans-serif;
+    padding: 20px;
+    background-color: #DFFFE0;
+}
+    table {
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 10px;
+      text-align: center;
+    }
+    .green {
+      background-color: #a8e6a1;
+    }
+    .red {
+      background-color: #f5a9a9;
+    }
+    .black {
+      background-color: #333;
+      color: white;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Toaq Syllable Table</h1>
+  <p>
+    This table shows all possible monosyllablic words in Toaq. Cells are
+    <span class="green">green</span> if the syllable is already a word,
+    <span class="red">red</span> if unused,
+    and <span class="black">black</span> if the combination is disallowed (e.g., <code>nh</code> with <code>ı</code>).<br>You can click on green words to check their Toadua definitions.
+  </p>
+  <div id="syllable-table"></div>
+
+  <script>
+    const initials = ['m', 'b', 'p', 'f', 'n', 'd', 't', 'z', 'c', 's', 'r', 'l', 'nh', 'j', 'ch', 'sh', 'ꝡ'];
+    const endings = [
+      'a', 'u', 'ua', 'uı', 'uo', 'ue', 'ı', 'ıa', 'ıu', 'ıo', 'ıe', 'o', 'oa', 'oe', 'e', 'ea', 'eu', 'eo',
+      'aı', 'ao', 'oı', 'eı', 'uaq', 'uıq', 'uoq', 'ueq', 'ıaq', 'ıuq', 'ıoq', 'ıeq', 'oaq', 'oeq', 'eaq',
+      'euq', 'eoq', 'uam', 'uım', 'uom', 'uem', 'ıam', 'ıum', 'ıom', 'ıem', 'oam', 'oem', 'eam', 'eum',
+      'eom', 'eaı', 'ıaı', 'uaı', 'oaı', 'eao', 'ıao', 'uao', 'oao', 'eoı', 'ıoı', 'uoı', 'ıeı', 'ueı', 'oeı'
+    ];
+
+    function removeDiacritics(str) {
+      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); //remove the hats
+    }
+
+    async function fetchWordList() {
+      try {
+        const response = await fetch('https://raw.githubusercontent.com/mi2ebi/soakue/refs/heads/main/data/all.txt');
+        const text = await response.text();
+        return text.split('\n')
+          .map(word => word.trim())
+          .filter(word => word && !word.includes('y') && !word.includes('-')) //remove the gammas and prefixes
+          .map(word => removeDiacritics(word.toLowerCase()))
+          .filter(word =>
+            initials.some(init => word.startsWith(init)) &&
+            endings.some(end => word.endsWith(end)) &&
+            initials.some(init => endings.some(end => word === init + end))
+          );
+      } catch (error) {
+        console.error('Error fetching word list:', error);
+        return [];
+      }
+    }
+
+    async function generateSyllableTable() {
+      const words = await fetchWordList();
+      const wordSet = new Set(words);
+
+      const table = document.createElement('table');
+      const headerRow = document.createElement('tr');
+      headerRow.appendChild(document.createElement('th')); // thetopleft blank cell
+
+      initials.forEach(init => {
+        const th = document.createElement('th');
+        th.textContent = init;
+        headerRow.appendChild(th);
+      });
+      table.appendChild(headerRow);
+
+      endings.forEach(end => {
+        const row = document.createElement('tr');
+        const rowHeader = document.createElement('th');
+        rowHeader.textContent = end;
+        row.appendChild(rowHeader);
+
+        initials.forEach(init => {
+          const syllable = init + end;
+          const td = document.createElement('td');
+
+          const invalid = init === 'nh' && end.startsWith('ı');
+          if (invalid) {
+            td.className = 'black';
+            td.textContent = syllable;
+          } else if (wordSet.has(syllable)) {
+            td.className = 'green';
+            const link = document.createElement('a');
+            link.href = `https://toadua.uakci.space/#${syllable}`;
+            link.target = '_blank';
+            link.textContent = syllable;
+            td.appendChild(link);
+          } else {
+            td.className = 'red';
+            td.textContent = syllable;
+          }
+
+          row.appendChild(td);
+        });
+
+        table.appendChild(row);
+      });
+
+      document.getElementById('syllable-table').appendChild(table);
+    }
+
+    generateSyllableTable();
+  </script>
+</body>
+</html>
+
