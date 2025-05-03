@@ -38,6 +38,9 @@
     <button class="tab-btn" data-tab="scores">Top Scores</button>
     <button class="tab-btn" data-tab="all">Most Entries Added (Unfiltered)</button>
     <button class="tab-btn" data-tab="consistency">Consistency</button>
+    <button class="tab-btn" data-tab="percent">Contribution %</button>
+    <button class="tab-btn" data-tab="topwords">Top Words by Score</button>
+
   </div>
 
   <div id="loading">Loading...</div>
@@ -58,6 +61,15 @@
     <h2>Consistency (Score per Word) <button style="float: right; background-color: #F8BBD0;" onclick="downloadCSV('consistency')">Download CSV</button></h2>
     <table><thead><tr><th>#</th><th>User</th><th>Consistency</th></tr></thead><tbody></tbody></table>
   </div>
+  <div id="percent" class="tab-content">
+    <h2>Contribution Percentage <button style="float: right; background-color: #F8BBD0;" onclick="downloadCSV('percent')">Download CSV</button></h2>
+    <table><thead><tr><th>#</th><th>User</th><th>Contribution %</th></tr></thead><tbody></tbody></table>
+  </div>
+  <div id="topwords" class="tab-content">
+    <h2>Top Words by Score <button style="float: right; background-color: #F8BBD0;" onclick="downloadCSV('topwords')">Download CSV</button></h2>
+    <table><thead><tr><th>#</th><th>Word</th><th>Score</th></tr></thead><tbody></tbody></table>
+  </div>
+  
   
 
   <script>
@@ -136,19 +148,29 @@
     function renderTable(containerId, counts) {
       const tbody = document.querySelector(`#${containerId} tbody`);
       tbody.innerHTML = '';
-      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+      // Determine if this is percentage data
+      const isPercentage = Object.values(counts)[0]?.toString().includes('%');
+
+      const sorted = Object.entries(counts).sort((a, b) => {
+        const aVal = isPercentage ? parseFloat(a[1]) : a[1];
+        const bVal = isPercentage ? parseFloat(b[1]) : b[1];
+        return bVal - aVal;
+      });
 
       let currentRank = 0, prevValue = null, displayRank = 0;
 
       sorted.forEach(([user, value], index) => {
         currentRank++;
-        if (value !== prevValue) displayRank = currentRank;
-        prevValue = value;
+        const numericValue = isPercentage ? parseFloat(value) : value;
+        if (numericValue !== prevValue) displayRank = currentRank;
+        prevValue = numericValue;
 
         const row = `<tr><td>${displayRank}</td><td class="user">${user}</td><td>${value}</td></tr>`;
         tbody.insertAdjacentHTML('beforeend', row);
       });
     }
+
 
     function downloadCSV(containerId) {
       const rows = [["#", "User", 
@@ -219,21 +241,43 @@
       const m = globalWords > 0 ? globalScore / globalWords : 0;
       const C = 50; // 50 for now
       const consistency = {};
-for (const user in scores) {
-  const s = scores[user];
-  const w = filteredWords[user] || 0;
+    for (const user in scores) {
+      const s = scores[user];
+      const w = filteredWords[user] || 0;
 
-  if (w > 0) {
-    const bayesianAvg = (C * m + s) / (C + w);
-    consistency[user] = bayesianAvg.toFixed(2);
+      if (w > 0) {
+        const bayesianAvg = (C * m + s) / (C + w);
+        consistency[user] = bayesianAvg.toFixed(2);
+      }
+    }
+    const totalValidWords = Object.values(filteredWords).reduce((sum, val) => sum + val, 0);
+    const contributionPercent = {};
+
+    for (const user in filteredWords) {
+      const percent = (filteredWords[user] / totalValidWords) * 100;
+      contributionPercent[user] = percent.toFixed(2) + "%";
+    }
+    const wordScores = {};
+
+for (const entry of data) {
+  if (!inDateRange(entry, startDate, endDate, dateFilterEnabled)) continue;
+  if (IGNORE_USERS.has(entry.user)) continue;
+
+  if (!entry.head.includes(' ') && !entry.head.includes('y') && entry.scope === 'en') {
+    const word = entry.head;
+    wordScores[word] = Math.max(wordScores[word] || 0, entry.score || 0);
   }
 }
+
 
 
       renderTable('filtered', filteredWords);
       renderTable('scores', scores);
       renderTable('all', allEntries);
       renderTable('consistency', consistency);
+
+      renderTable('percent', contributionPercent);
+      renderTable('topwords', wordScores);
 
 
       document.getElementById('loading').style.display = 'none';
