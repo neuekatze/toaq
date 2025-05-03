@@ -1,0 +1,47 @@
+@font-face {
+    font-family: firasub; /* only has A-Z and a-z, usernames cant be anything else anyway*/
+    src: url(firasub.woff2);
+  }
+  
+@font-face {
+    font-family: Prova;
+    src: url(prova.woff);
+  }
+  
+  @font-face {
+    font-family: Prova;
+    src: url(provabold.woff);
+    font-weight: bold;
+  }
+  
+
+body {
+    font-family: Prova, sans-serif;
+    padding: 20px;
+    background-color: #DFFFE0;
+}
+h1 { margin-bottom: 10px; }
+button {
+    border-radius: 8px;
+    background-color: #DFFFE0;
+}
+
+.tabs { margin-bottom: 10px; }
+.tab-btn {
+  padding: 10px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background: #A5D6A7;
+  margin-right: 5px;
+}
+.tab-btn.active { background: #81C784; font-weight: bold; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th, td { border: 1px solid #B2D8B2; padding: 8px; text-align: left; }
+th { background-color: #A5D6A7; }
+td.user { font-family: "firasub", Times, serif; }
+#loading { font-weight: bold; margin-top: 20px; }
+.controls { margin-bottom: 10px; }
+.date-range { display: none; margin-top: 5px; }
+.controls label, .controls select { margin-right: 10px; }
