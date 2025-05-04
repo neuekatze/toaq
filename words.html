@@ -113,7 +113,7 @@
           const syllable = init + end;
           const td = document.createElement('td');
 
-          const invalid = init === (('nh' && end.startsWith('ı')) || ('ꝡ' && end.startsWith('ı')));
+          const invalid = (init === 'nh' && end.startsWith('ı')) || (init === 'ꝡ' && startsWithIorU);
           if (invalid) {
             td.className = 'black';
             td.textContent = syllable;
