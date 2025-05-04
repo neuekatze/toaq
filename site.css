@@ -5,12 +5,12 @@
   
 @font-face {
     font-family: Prova;
-    src: url(prova.woff);
+    src: url(prova.woff2);
   }
   
   @font-face {
     font-family: Prova;
-    src: url(provabold.woff);
+    src: url(provabold.woff2);
     font-weight: bold;
   }
   
