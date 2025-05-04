@@ -57,7 +57,7 @@
   <div id="syllable-table"></div>
 
   <script>
-    const initials = ['m', 'b', 'p', 'f', 'n', 'd', 't', 'z', 'c', 's', 'r', 'l', 'nh', 'j', 'ch', 'sh', 'ꝡ'];
+    const initials = ['', 'm', 'b', 'p', 'f', 'n', 'd', 't', 'z', 'c', 's', 'r', 'l', 'nh', 'j', 'ch', 'sh', 'ꝡ', 'q', 'g', 'k', 'h'];
     const endings = [
       'a', 'u', 'ua', 'uı', 'uo', 'ue', 'ı', 'ıa', 'ıu', 'ıo', 'ıe', 'o', 'oa', 'oe', 'e', 'ea', 'eu', 'eo',
       'aı', 'ao', 'oı', 'eı', 'uaq', 'uıq', 'uoq', 'ueq', 'ıaq', 'ıuq', 'ıoq', 'ıeq', 'oaq', 'oeq', 'eaq',
@@ -66,7 +66,7 @@
     ];
 
     function removeDiacritics(str) {
-      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); //remove the hats
+      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/i/, 'ı'); //remove the hats
     }
 
     async function fetchWordList() {
@@ -98,7 +98,7 @@
 
       initials.forEach(init => {
         const th = document.createElement('th');
-        th.textContent = init;
+        th.textContent = init === '' ? "'" : init;
         headerRow.appendChild(th);
       });
       table.appendChild(headerRow);
@@ -142,4 +142,3 @@
   </script>
 </body>
 </html>
-
