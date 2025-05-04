@@ -112,8 +112,8 @@
         initials.forEach(init => {
           const syllable = init + end;
           const td = document.createElement('td');
-
-          const invalid = (init === 'nh' && end.startsWith('ı')) || (init === 'ꝡ' && (end.startsWith('ı') || end.startsWith('u'));
+          const startsWithIorU = end.startsWith('ı') || end.startsWith('u');
+          const invalid = (init === 'nh' && end.startsWith('ı')) || (init === 'ꝡ' && startsWithIorU);
           if (invalid) {
             td.className = 'black';
             td.textContent = syllable;
