@@ -58,7 +58,10 @@
     <table><thead><tr><th>#</th><th>User</th><th>Entries</th></tr></thead><tbody></tbody></table>
   </div>
   <div id="consistency" class="tab-content">
-    <h2>Consistency (Score per Word) <button style="float: right; background-color: #F8BBD0;" onclick="downloadCSV('consistency')">Download CSV</button></h2>
+    <h2>
+      Consistency (Score per Word)</h2>
+      <a href="https://en.wikipedia.org/wiki/Bayesian_average">C value</a>: <input type="number" id="consistency-C" value="50" min="0" style="width: 60px; margin-left: 10px;" onchange="main()" title="Adjust C value for Bayesian average"/>  (50 by default)
+      <button style="float: right; background-color: #F8BBD0;" onclick="downloadCSV('consistency')">Download CSV</button>
     <table><thead><tr><th>#</th><th>User</th><th>Consistency</th></tr></thead><tbody></tbody></table>
   </div>
   <div id="percent" class="tab-content">
@@ -239,7 +242,7 @@
       }
 
       const m = globalWords > 0 ? globalScore / globalWords : 0;
-      const C = 50; // 50 for now
+      const C = parseFloat(document.getElementById('consistency-C').value) || 0;
       const consistency = {};
     for (const user in scores) {
       const s = scores[user];
@@ -259,15 +262,15 @@
     }
     const wordScores = {};
 
-for (const entry of data) {
-  if (!inDateRange(entry, startDate, endDate, dateFilterEnabled)) continue;
-  if (IGNORE_USERS.has(entry.user)) continue;
+        for (const entry of data) {
+          if (!inDateRange(entry, startDate, endDate, dateFilterEnabled)) continue;
+          if (IGNORE_USERS.has(entry.user)) continue;
 
-  if (!entry.head.includes(' ') && !entry.head.includes('y') && entry.scope === 'en') {
-    const word = entry.head;
-    wordScores[word] = Math.max(wordScores[word] || 0, entry.score || 0);
-  }
-}
+          if (!entry.head.includes(' ') && !entry.head.includes('y') && entry.scope === 'en') {
+            const word = entry.head;
+            wordScores[word] = Math.max(wordScores[word] || 0, entry.score || 0);
+          }
+        }
 
 
 
